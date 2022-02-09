@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  labels:
+    kubernetes.io/metadata.name: dev2
+  name: dev2
+spec:
+  finalizers:
+  - kubernetes
+status:
+  phase: Active
