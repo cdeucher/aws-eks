@@ -1,0 +1,55 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hello-kubernetes
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: hello-kubernetes
+  template:
+    metadata:
+      labels:
+        app: hello-kubernetes
+    spec:
+      containers:
+      - name: hello-kubernetes
+        image: paulbouwer/hello-kubernetes:1.5
+        ports:
+        - containerPort: 8080
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: hello-kubernetes
+spec:
+  # use ClusterIP with ingress
+  type: ClusterIP
+  ports:
+  # service listens on http (80)
+  - port: 80
+    # sends to a pod on port 8080
+    targetPort: 8080
+  selector:
+    app: hello-kubernetes
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: hello-kubernetes
+  annotations:
+    # use nginx-ingress (needed if 2+ ingress controllers)
+    kubernetes.io/ingress.class: nginx
+spec:
+  rules:
+    # route by virtualhost - externaldns registers this record
+  - host: hello-kubernetes.cabd.link
+    http:
+      paths:
+      - backend:
+          serviceName: hello-kubernetes
+          # connect to service using http port
+          servicePort: 80
+        # default path put here explicitly for illustrative purposes
+        path: /    

@@ -13,10 +13,10 @@ $ eksctl create cluster -f simple-cluster/cluster-spot.yml
  export REGION="us-east-1"
  
 # Create your IAM OIDC Identity Provider for your cluster
-eksctl utils associate-iam-oidc-provider --cluster eksworkshop-eksctl --approve
+eksctl utils associate-iam-oidc-provider --cluster cluster-spot --approve
 
 # create bucket S3
-aws s3 mb s3://eksworkshop-$ACCOUNT_ID-$AWS_REGION --region $AWS_REGION
+aws s3 mb s3://eksworkshop-$ACCOUNT_ID-$REGION --region $REGION
 
 # search for the policy
 aws iam list-policies --query 'Policies[?PolicyName==`AmazonS3ReadOnlyAccess`].Arn'
@@ -25,7 +25,7 @@ aws iam list-policies --query 'Policies[?PolicyName==`AmazonS3ReadOnlyAccess`].A
 eksctl create iamserviceaccount \
     --name iam-test \
     --namespace default \
-    --cluster eksworkshop-eksctl \
+    --cluster cluster-spot \
     --attach-policy-arn arn:aws:iam::aws:policy/AmazonS3ReadOnlyAccess \
     --approve \
     --override-existing-serviceaccounts
