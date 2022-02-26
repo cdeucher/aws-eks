@@ -42,6 +42,7 @@ metadata:
   annotations:
     kubernetes.io/ingress.class: "nginx"
     cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    cert-manager.io/acme-challenge-type: dns01    
 spec:
   tls:
     - hosts:
@@ -49,7 +50,8 @@ spec:
         - '*.dfDns'
       secretName: acme-route53
   rules:
-    - host: dfDns
+    # create this sub-dns
+    - host: hello.dfDns
       http:
         paths:
           - path: /

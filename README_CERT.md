@@ -2,6 +2,13 @@
 
 - AWS Route53 DNS and HostedZone are required.
 
+## Update Helm charts
+```bash
+ helm repo add jetstack https://charts.jetstack.io 
+ helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
+ helm update
+```
+
 ## Setup Cluster
 ```bash
  eksctl create cluster -f cluster-spot-dns.yml
@@ -25,46 +32,66 @@
  
  for file in $(ls lets-encrypt) ; do
     for a in $(echo 'dfEmail  dfHostedZoneID  dfAccessKeyID  dfDns') ; do
-      # MAC, otherwise replace -ibackp -> -i 
       sed -i.backp "s?${a}?${(P)a}?g" "lets-encrypt/${file}"    
    done
  done
 ```
 
-
 ## Setup cert-manager
 ```bash
- kubectl apply --validate=false -f lets-encrypt/00-crds.yaml
- kubectl create ns cert-manager
- helm repo add jetstack https://charts.jetstack.io 
- helm repo update
+ kubectl create ns cert-manager 
+ helm install cert-manager jetstack/cert-manager --namespace cert-manager \
+ --set installCRDs=true
  
- helm install cert-manager --namespace cert-manager --version v0.12.0 jetstack/cert-manager
  kubectl get pods -n cert-manager
 ```
 
-## Setup Certificate
+## Setup nginx-ingress
+```bash
+ helm install ingress-controller ingress-nginx/ingress-nginx
+```
+
+## Setup cluster-issue
 ```bash
  echo $(cat /tmp/cert-user.json | grep -E ":.{30}(/)?.+" | cut -d'"' -f4) > secretkey
- kubectl create secret generic acme-route53 --from-file=secret-access-key=./secretkey -n cert-manager
- kubectl describe secret acme-route53 -n cert-manager
- kubectl get secret acme-route53 -n cert-manager -o=yaml
+ kubectl create secret generic iam-secret --from-file=secret-access-key=./secretkey -n cert-manager
+ kubectl describe secret iam-secret
+ kubectl get secret iam-secret -o=yaml
  
- kubectl apply -f lets-encrypt/cluster-issue.yaml -n cert-manager
- kubectl get clusterissuer -n cert-manager
- kubectl describe clusterissuer letsencrypt-prod -n cert-manager 
+ kubectl apply -f lets-encrypt/cluster-issue.yaml
+ kubectl get clusterissuer
+ kubectl describe clusterissuer letsencrypt-prod
  
- kubectl apply -f lets-encrypt/certificate.yaml -n cert-manager
- kubectl get certificate -n cert-manager
- kubectl describe certificate acme-route53-tls -n cert-manager  
+ kubectl apply -f lets-encrypt/certificate.yaml
+ kubectl get certificate
+ kubectl describe certificate acme-route53-tls
  
- CR=$(kubectl get CertificateRequest -n cert-manager | grep -Eo "acme-route53-tls-\d+")
- kubectl describe CertificateRequest $CR -n cert-manager
+ # check secret created with tls certs
+ kube get secrets | grep "kubernetes.io/tls"
+
+ # logs
+ CR=$(kubectl get CertificateRequest | grep -Eo "acme-route53-tls-\d+")
+ kubectl describe CertificateRequest $CR
+```
+
+## Setup certificate
+```bash
+ 
+ kubectl apply -f lets-encrypt/certificate.yaml
+ kubectl get certificate
+ kubectl describe certificate acme-route53-tls
+ 
+ # check secret created with tls certs
+ kube get secrets | grep "kubernetes.io/tls"
+
+ # logs
+ CR=$(kubectl get CertificateRequest | grep -Eo "acme-route53-tls-\d+")
+ kubectl describe CertificateRequest $CR
 ```
 
 ## Setup hello-world
 ```bash
- kubectl apply -f lets-encrypt/hello-ingress.yaml -n default
+ kubectl apply -f lets-encrypt/hello-ingress.yaml
 ```
 
 ## Debug
@@ -73,16 +100,16 @@
 kube logs -f pod/cert-manager-9dd764fb8-rblvx -n cert-manager
 
 # show secret value
-kubectl get secret acme-route53 -n cert-manager -o=yaml | \
+kubectl get secret iam-secret -o=yaml | \
 grep -E "secret-access-key.+$" | cut -d":" -f2 | base64 -d
 
 ```
 
 ## CleanUp
 ```bash
- kubectl delete -f lets-encrypt/certificate.yaml -n cert-manager
- kubectl delete -f lets-encrypt/cluster-issue.yaml -n cert-manager
- kubectl delete secret acme-route53 -n cert-manager
+ kubectl delete -f lets-encrypt/certificate.yaml 
+ kubectl delete -f lets-encrypt/cluster-issue.yaml 
+ kubectl delete secret iam-secret -n cert-manager 
  kubectl delete -f lets-encrypt/hello-ingress.yaml -n default 
  aws iam delete-access-key --user-name cert-user --access-key-id=$(jq -r .AccessKey.AccessKeyId /tmp/cert-user.json)
  aws iam delete-policy --policy-name cert-user-policy
@@ -94,3 +121,5 @@ grep -E "secret-access-key.+$" | cut -d":" -f2 | base64 -d
 ## Links
  - https://medium.com/cloud-prodigy/configure-letsencrypt-and-cert-manager-with-kubernetes-3156981960d9
  - https://myhightech.org/posts/20210402-cert-manager-on-eks/
+ - https://getbetterdevops.io/k8s-ingress-with-letsencrypt/
+ - https://voyagermesh.com/docs/v12.0.0/guides/cert-manager/dns01_challenge/aws-route53/
