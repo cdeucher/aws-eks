@@ -1,4 +1,4 @@
-# Setup EKS Cluster and LetsEncrypt with Certificate Manager
+# Setup EKS Cluster and LetsEncrypt with nginx-ingress
 
 - AWS Route53 DNS and HostedZone are required.
 
@@ -91,6 +91,7 @@
 
 ## Setup hello-world
 ```bash
+ # it's necessary to create this subdomain inside the Route53
  kubectl apply -f lets-encrypt/hello-ingress.yaml
 ```
 
@@ -119,7 +120,7 @@ grep -E "secret-access-key.+$" | cut -d":" -f2 | base64 -d
 ```
 
 ## Links
+ - https://voyagermesh.com/docs/v12.0.0/guides/cert-manager/dns01_challenge/aws-route53/
  - https://medium.com/cloud-prodigy/configure-letsencrypt-and-cert-manager-with-kubernetes-3156981960d9
  - https://myhightech.org/posts/20210402-cert-manager-on-eks/
  - https://getbetterdevops.io/k8s-ingress-with-letsencrypt/
- - https://voyagermesh.com/docs/v12.0.0/guides/cert-manager/dns01_challenge/aws-route53/

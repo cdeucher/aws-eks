@@ -1,5 +1,5 @@
 
-# Setup EKS Cluster with EC2 Spot Request and DNS Management
+# Setup EKS Cluster and Certificate Manager with Nginx-ingress 
 
 ## Setup Cluster
 ```bash
@@ -11,8 +11,16 @@
  aws route53 list-hosted-zones
  aws acm list-certificates --region us-east-1
 ```
+## Setup Environments
+```bash
+ $ dfDns="your.dns.com"
+ 
+ for file in $(ls nginx-ingress) ; do
+    sed -i.backp "s?dfDns?${dfDns}?g" "nginx-ingress/${file}"    
+ done
+```
 
-## On AWS Console Management
+## Manual steps: AWS Console Management
  - Create Route53 DNS.
  - Create Certificate Manager solicitation to the DNS.
  ```bash
@@ -25,11 +33,9 @@
   helm repo add "bitnami" "https://charts.bitnami.com/bitnami"
   helm repo add "ingress-nginx" "https://kubernetes.github.io/ingress-nginx"
 
-  # replace 'domainFilters' inside the file `values.external-dns.yaml`
-  helm install extdns --values values.external-dns.yaml bitnami/external-dns
+  helm install extdns --values nginx-ingress/values.external-dns.yaml bitnami/external-dns
   kubectl get svc | grep external-dns
 
-  # MAC, replace -ibackp -> -i 
   sed -i.backp "s?certificate-arn?${certificate}?g" nginx-ingress/values.nginx-ingress.yaml
 
   helm install nginx-ingress --values nginx-ingress/values.nginx-ingress.yaml ingress-nginx/ingress-nginx

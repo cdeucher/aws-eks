@@ -7,8 +7,8 @@
 ### Setup EKS Cluster and Service Accounts Access
 [README](README_SA.md)
 
-### Setup EKS Cluster with Nginx-ingress and Certificate Manager
+### Setup EKS Cluster and Nginx-ingress with Certificate Manager
 [README](README_DNS.md)
 
-### Setup EKS Cluster and LetsEncrypt with Certificate Manager
+### Setup EKS Cluster and Nginx-ingress with LetsEncrypt
 [README](README_CERT.md)

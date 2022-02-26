@@ -9,7 +9,7 @@ controller:
   service:
     # AWS Annotations for LoadBalaner with Certificate ARN
     annotations:
-      service.beta.kubernetes.io/aws-load-balancer-ssl-cert: "certificate-arn"
+      service.beta.kubernetes.io/aws-load-balancer-ssl-cert: "arn:aws:acm:us-east-1:260578539897:certificate/5e5af158-81c3-40a3-b3e4-7c9f67a58edf"
       service.beta.kubernetes.io/aws-load-balancer-backend-protocol: "http"
       service.beta.kubernetes.io/aws-load-balancer-ssl-ports: "443"
       service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "60"

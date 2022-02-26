@@ -50,7 +50,7 @@ spec:
         - '*.dfDns'
       secretName: acme-route53
   rules:
-    # create this sub-dns
+    # it's necessary to create this subdomain inside the Route53
     - host: hello.dfDns
       http:
         paths:
