@@ -1,4 +1,4 @@
-# Setup EKS Cluster and LetsEncrypt with Certificate Manager
+# Setup EKS Cluster and LetsEncrypt with nginx-ingress
 
 - AWS Route53 DNS and HostedZone are required.
 
@@ -6,7 +6,7 @@
 ```bash
  helm repo add jetstack https://charts.jetstack.io 
  helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
- helm update
+ helm repo update
 ```
 
 ## Setup Cluster
@@ -27,7 +27,7 @@
 ```bash
  $ dfEmail="your@email.com.br"
  $ dfHostedZoneID="AWS-Hosted-Zone-ID"
- $ dfAccessKeyID="IAM-Access-Key-ID"
+ $ dfAccessKeyID="$(jq -r .AccessKey.AccessKeyId /tmp/cert-user.json)"
  $ dfDns="your.dns.com"
  
  for file in $(ls lets-encrypt) ; do
@@ -61,18 +61,7 @@
  kubectl apply -f lets-encrypt/cluster-issue.yaml
  kubectl get clusterissuer
  kubectl describe clusterissuer letsencrypt-prod
- 
- kubectl apply -f lets-encrypt/certificate.yaml
- kubectl get certificate
- kubectl describe certificate acme-route53-tls
- 
- # check secret created with tls certs
- kube get secrets | grep "kubernetes.io/tls"
-
- # logs
- CR=$(kubectl get CertificateRequest | grep -Eo "acme-route53-tls-\d+")
- kubectl describe CertificateRequest $CR
-```
+ ```
 
 ## Setup certificate
 ```bash
@@ -91,6 +80,7 @@
 
 ## Setup hello-world
 ```bash
+ # it's necessary to create this subdomain inside the Route53
  kubectl apply -f lets-encrypt/hello-ingress.yaml
 ```
 
@@ -119,7 +109,7 @@ grep -E "secret-access-key.+$" | cut -d":" -f2 | base64 -d
 ```
 
 ## Links
+ - https://voyagermesh.com/docs/v12.0.0/guides/cert-manager/dns01_challenge/aws-route53/
  - https://medium.com/cloud-prodigy/configure-letsencrypt-and-cert-manager-with-kubernetes-3156981960d9
  - https://myhightech.org/posts/20210402-cert-manager-on-eks/
  - https://getbetterdevops.io/k8s-ingress-with-letsencrypt/
- - https://voyagermesh.com/docs/v12.0.0/guides/cert-manager/dns01_challenge/aws-route53/
