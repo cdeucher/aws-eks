@@ -30,15 +30,15 @@
   kubectl get svc | grep external-dns
 
   # MAC, replace -ibackp -> -i 
-  sed -i.backp "s?certificate-arn?${certificate}?g" values.nginx-ingress.yaml
+  sed -i.backp "s?certificate-arn?${certificate}?g" nginx-ingress/values.nginx-ingress.yaml
 
-  helm install nginx-ingress --values values.nginx-ingress.yaml ingress-nginx/ingress-nginx
+  helm install nginx-ingress --values nginx-ingress/values.nginx-ingress.yaml ingress-nginx/ingress-nginx
  ```
 
 ## Deploy application
  ```bash
   # replace 'host' inside the file `hello-kubernetes.yaml`
-  kubectl apply -f hello-kubernetes.yaml
+  kubectl apply -f nginx-ingress/hello-kubernetes.yaml
   kubectl get ingress
  ```
  
@@ -49,6 +49,6 @@
 
 
 
- ## Links
+## Links
  - https://www.nginx.com/blog/deploying-nginx-ingress-controller-on-amazon-eks-how-we-tested/
  - https://joachim8675309.medium.com/adding-ingress-with-amazon-eks-6c4379803b2

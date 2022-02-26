@@ -1,0 +1,23 @@
+apiVersion: cert-manager.io/v1alpha2
+kind: ClusterIssuer
+metadata:
+  name: letsencrypt-prod
+  namespace: cert-manager
+spec:
+  acme:
+    server: https://acme-v02.api.letsencrypt.org/directory
+    email: dfEmail
+    privateKeySecretRef:
+      name: letsencrypt-prod
+    solvers:
+      - selector:
+          dnsZones:
+            - "dfDns"
+        dns01:
+          route53:
+            region: us-east-1
+            hostedZoneID: dfHostedZoneID
+            accessKeyID: dfAccessKeyID
+            secretAccessKeySecretRef:
+              name: acme-route53
+              key: secret-access-key

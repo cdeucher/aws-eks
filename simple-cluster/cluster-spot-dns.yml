@@ -20,3 +20,4 @@ nodeGroups:
         withAddonPolicies: # polices added to worker node role
           externalDNS: true # allows read/write to zones in Route53
           certManager: true # access to ACM
+          albIngress: true # access to ALB
