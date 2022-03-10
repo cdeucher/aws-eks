@@ -37,7 +37,7 @@ spec:
 apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
-  name: nginx
+  name: nginx-v1beta1
   namespace: default
   annotations:
     kubernetes.io/ingress.class: "nginx"
@@ -58,3 +58,29 @@ spec:
             backend:
               serviceName: hello-kubernetes
               servicePort: 80
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: nginx-v1
+  annotations:
+#    kubernetes.io/ingress.class: "nginx"
+    cert-manager.io/issuer: "letsencrypt-prod"
+spec:
+  tls:
+    - hosts:
+        - 'dfDns'
+        - '*.dfDns'
+      secretName: acme-route53
+  ingressClassName: nginx
+  rules:
+    - host: hello2.dfDns
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: hello-kubernetes
+                port:
+                  number: 80
