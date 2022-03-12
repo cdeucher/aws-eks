@@ -12,6 +12,7 @@ spec:
       - selector:
           dnsZones:
             - "dfDns"
+        # DNS Challenger
         dns01:
           route53:
             region: us-east-1

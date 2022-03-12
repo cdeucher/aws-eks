@@ -58,6 +58,7 @@
  kubectl describe secret iam-secret -n cert-manager
  kubectl get secret iam-secret -n cert-manager -o=yaml 
  
+ # Issuer represents the Certificate Authority (CA)
  kubectl apply -f lets-encrypt/cluster-issuer.yaml
  kubectl get clusterissuer
  kubectl describe clusterissuer letsencrypt-prod
@@ -116,3 +117,4 @@ grep -E "secret-access-key.+$" | cut -d":" -f2 | base64 -d
  - https://medium.com/cloud-prodigy/configure-letsencrypt-and-cert-manager-with-kubernetes-3156981960d9
  - https://myhightech.org/posts/20210402-cert-manager-on-eks/
  - https://getbetterdevops.io/k8s-ingress-with-letsencrypt/
+ - https://www.youtube.com/watch?v=DvXkD0f-lhY
