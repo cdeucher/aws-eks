@@ -4,7 +4,7 @@ kind: Deployment
 metadata:
   name: hello-kubernetes
 spec:
-  replicas: 3
+  replicas: 1
   selector:
     matchLabels:
       app: hello-kubernetes
@@ -44,7 +44,7 @@ metadata:
 spec:
   rules:
     # route by virtualhost - externaldns registers this record
-  - host: hello-kubernetes.cabd.link
+  - host: hello.dfDns
     http:
       paths:
       - backend:

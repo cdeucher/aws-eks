@@ -1,11 +1,15 @@
 # restrict to changes to these domains
 domainFilters:
-  - cabd.link
+  - dfDns
 # descriptive text to show who created record
 txtOwnerId: "externaldns"
 aws:
   zoneType: public
-  region: ""
+  region: "us-east-1"
+  roleArn: "dfServiceAccountArn"
+serviceAccount:
+  create: false
+  name: "external-dns"
 # fetch latest image from the source
 image:
   registry: registry.opensource.zalan.do

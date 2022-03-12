@@ -6,7 +6,7 @@
 ```bash
  helm repo add jetstack https://charts.jetstack.io 
  helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
- helm update
+ helm repo update
 ```
 
 ## Setup Cluster
@@ -27,7 +27,7 @@
 ```bash
  $ dfEmail="your@email.com.br"
  $ dfHostedZoneID="AWS-Hosted-Zone-ID"
- $ dfAccessKeyID="IAM-Access-Key-ID"
+ $ dfAccessKeyID="$(jq -r .AccessKey.AccessKeyId /tmp/cert-user.json)"
  $ dfDns="your.dns.com"
  
  for file in $(ls lets-encrypt) ; do
@@ -55,24 +55,13 @@
 ```bash
  echo $(cat /tmp/cert-user.json | grep -E ":.{30}(/)?.+" | cut -d'"' -f4) > secretkey
  kubectl create secret generic iam-secret --from-file=secret-access-key=./secretkey -n cert-manager
- kubectl describe secret iam-secret
- kubectl get secret iam-secret -o=yaml
+ kubectl describe secret iam-secret -n cert-manager
+ kubectl get secret iam-secret -n cert-manager -o=yaml 
  
- kubectl apply -f lets-encrypt/cluster-issue.yaml
+ kubectl apply -f lets-encrypt/cluster-issuer.yaml
  kubectl get clusterissuer
  kubectl describe clusterissuer letsencrypt-prod
- 
- kubectl apply -f lets-encrypt/certificate.yaml
- kubectl get certificate
- kubectl describe certificate acme-route53-tls
- 
- # check secret created with tls certs
- kube get secrets | grep "kubernetes.io/tls"
-
- # logs
- CR=$(kubectl get CertificateRequest | grep -Eo "acme-route53-tls-\d+")
- kubectl describe CertificateRequest $CR
-```
+ ```
 
 ## Setup certificate
 ```bash
@@ -87,6 +76,8 @@
  # logs
  CR=$(kubectl get CertificateRequest | grep -Eo "acme-route53-tls-\d+")
  kubectl describe CertificateRequest $CR
+ 
+ kube logs -f $(kube get pods -n cert-manager | grep -Eo "cert-manager-[0-9][a-z0-9-]+") -n cert-manager
 ```
 
 ## Setup hello-world
@@ -109,12 +100,13 @@ grep -E "secret-access-key.+$" | cut -d":" -f2 | base64 -d
 ## CleanUp
 ```bash
  kubectl delete -f lets-encrypt/certificate.yaml 
- kubectl delete -f lets-encrypt/cluster-issue.yaml 
+ kubectl delete -f lets-encrypt/cluster-issuer.yaml 
  kubectl delete secret iam-secret -n cert-manager 
  kubectl delete -f lets-encrypt/hello-ingress.yaml -n default 
  aws iam delete-access-key --user-name cert-user --access-key-id=$(jq -r .AccessKey.AccessKeyId /tmp/cert-user.json)
- aws iam delete-policy --policy-name cert-user-policy
+ aws iam detach-user-policy --user-name cert-user --policy-arn $POLICYARN
  aws iam delete-user --user-name cert-user
+ aws iam delete-policy --policy-arn $POLICYARN
  
  eksctl delete cluster -f cluster-spot-dns.yml
 ```
