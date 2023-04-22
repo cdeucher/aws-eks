@@ -4,9 +4,9 @@ metadata:
   name: example2
   labels:
     app: example2
-  namespace: dev2    
+  namespace: hello    
 spec:
-  type: LoadBalancer
+  type: ClusterIP
   selector:
     app: example2
   ports:

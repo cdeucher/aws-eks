@@ -12,7 +12,7 @@ nodeGroups:
       maxSize: 2
       instancesDistribution:
         maxPrice: 0.017
-        instanceTypes: ["t2.small", "t2.medium"] # At least one instance type should be specified
+        instanceTypes: ["t2.medium"] # At least one instance type should be specified
         onDemandBaseCapacity: 0
         onDemandPercentageAboveBaseCapacity: 95
         spotInstancePools: 1
